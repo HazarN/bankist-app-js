@@ -10,6 +10,7 @@ const labelSumIn = document.querySelector('.summary__value--in');
 const labelSumOut = document.querySelector('.summary__value--out');
 const labelSumInterest = document.querySelector('.summary__value--interest');
 const labelTimer = document.querySelector('.timer');
+const labelLoginFail = document.querySelector('.login-failed');
 
 const containerApp = document.querySelector('.app');
 const containerMovements = document.querySelector('.movements');
@@ -118,6 +119,7 @@ btnLogin.addEventListener('click', (e) => {
 
   if (currentAccount?.pin === Number(inputLoginPin.value)) {
     console.log('USER LOGGED IN');
+    labelLoginFail.textContent = '';
 
     // Clearing the input fields
     inputLoginUsername.value = inputLoginPin.value = '';
@@ -143,5 +145,12 @@ btnLogin.addEventListener('click', (e) => {
 
     // and summaries
     displaySummaries(summaries);
+  } else {
+    console.log('USER NOT LOGGED IN');
+    labelLoginFail.textContent = 'Wrong PIN, Try again';
   }
+
+  // Clearing the input fields
+  inputLoginUsername.value = inputLoginPin.value = '';
+  inputLoginPin.blur(); // it removes the cursor blinking
 });

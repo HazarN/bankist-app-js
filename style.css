@@ -295,3 +295,10 @@ h2 {
 .timer {
   font-weight: 600;
 }
+
+.login-failed {
+  font-size: 1.75rem;
+  margin-top: 0.5rem;
+  text-align: center;
+  color: #ff585f;
+}
