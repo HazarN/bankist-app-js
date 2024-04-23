@@ -52,8 +52,10 @@ const createUsernames = (accounts) => {
 /////////////////
 // Calculate here
 
-const calculateBalance = (movements) =>
-  movements.reduce((acc, mov) => acc + mov, 0);
+const calculateBalance = (account) => {
+  account.balance = account.movements.reduce((acc, mov) => acc + mov, 0);
+  return account.balance;
+};
 
 const calculateSummaries = (movements, interestRate) => {
   const income = movements
@@ -101,6 +103,23 @@ const displaySummaries = (summaries) => {
   labelSumInterest.textContent = `${summaries[2].toFixed(2)}€`;
 };
 
+const updateUI = (account) => {
+  const balance = calculateBalance(currentAccount);
+  const summaries = calculateSummaries(
+    currentAccount.movements,
+    currentAccount.interestRate
+  );
+
+  // movements,
+  displayMovements(currentAccount.movements);
+
+  // balance,
+  displayBalance(balance);
+
+  // and summaries
+  displaySummaries(summaries);
+};
+
 document.addEventListener('DOMContentLoaded', () => {
   createUsernames(accounts);
 });
@@ -131,26 +150,80 @@ btnLogin.addEventListener('click', (e) => {
     }`;
     containerApp.style.opacity = 100;
 
-    const balance = calculateBalance(currentAccount.movements);
-    const summaries = calculateSummaries(
-      currentAccount.movements,
-      currentAccount.interestRate
-    );
-
-    // movements,
-    displayMovements(currentAccount.movements);
-
-    // balance,
-    displayBalance(balance);
-
-    // and summaries
-    displaySummaries(summaries);
+    updateUI(currentAccount);
   } else {
     console.log('USER NOT LOGGED IN');
-    labelLoginFail.textContent = 'Wrong PIN, Try again';
+    labelLoginFail.textContent = 'Wrong PIN or user not found';
   }
 
   // Clearing the input fields
   inputLoginUsername.value = inputLoginPin.value = '';
   inputLoginPin.blur(); // it removes the cursor blinking
+});
+
+btnTransfer.addEventListener('click', (e) => {
+  e.preventDefault();
+
+  const amount = Number(inputTransferAmount.value);
+
+  const receviedAccount = accounts.find(
+    (account) => account.username === inputTransferTo.value
+  );
+
+  inputTransferAmount.value = inputTransferTo.value = '';
+  inputTransferAmount.blur();
+
+  if (
+    amount > 0 &&
+    currentAccount.balance >= amount &&
+    receviedAccount &&
+    receviedAccount.username !== currentAccount.username
+  ) {
+    currentAccount.movements.push(-amount);
+    receviedAccount.movements.push(amount);
+
+    updateUI(currentAccount);
+  }
+});
+
+btnClose.addEventListener('click', (e) => {
+  e.preventDefault();
+
+  if (
+    inputCloseUsername.value === currentAccount.username &&
+    Number(inputClosePin.value) === currentAccount.pin
+  ) {
+    const index = accounts.findIndex(
+      (account) => account.username === currentAccount.username
+    );
+
+    console.log(index);
+
+    // deletes the element at the index (mutates the array);
+    accounts.splice(index, 1);
+
+    // hide UI
+    containerApp.style.opacity = 0;
+  }
+
+  inputCloseUsername.value = inputClosePin.value = '';
+  inputClosePin.blur();
+});
+
+btnLoan.addEventListener('click', (e) => {
+  e.preventDefault();
+
+  const amount = Number(inputLoanAmount.value);
+
+  if (
+    amount > 0 &&
+    currentAccount.movements.some((mov) => mov > amount * 0.1)
+  ) {
+    currentAccount.movements.push(amount);
+
+    updateUI(currentAccount);
+  }
+
+  inputLoanAmount.value = '';
+  inputLoanAmount.blur();
 });
