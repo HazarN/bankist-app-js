@@ -32,6 +32,7 @@ const inputClosePin = document.querySelector('.form__input--pin');
 const accounts = [account1, account2, account3, account4];
 
 let currentAccount;
+let sorted = false;
 
 /* const currencies = new Map([
   ["USD", "United States dollar"],
@@ -77,10 +78,14 @@ const calculateSummaries = (movements, interestRate) => {
 ///////////////
 // Display here
 
-const displayMovements = (movements) => {
+const displayMovements = (movements, sorted) => {
   containerMovements.innerHTML = '';
 
-  movements.forEach((movement, i) => {
+  const movementsCopy = sorted
+    ? movements.slice().sort((x, y) => x - y)
+    : movements;
+
+  movementsCopy.forEach((movement, i) => {
     const type = movement > 0 ? 'deposit' : 'withdrawal';
 
     const html = `
@@ -111,7 +116,7 @@ const updateUI = (account) => {
   );
 
   // movements,
-  displayMovements(currentAccount.movements);
+  displayMovements(currentAccount.movements, false);
 
   // balance,
   displayBalance(balance);
@@ -226,4 +231,10 @@ btnLoan.addEventListener('click', (e) => {
 
   inputLoanAmount.value = '';
   inputLoanAmount.blur();
+});
+
+btnSort.addEventListener('click', (e) => {
+  e.preventDefault();
+  displayMovements(currentAccount.movements, !sorted);
+  sorted = !sorted;
 });
