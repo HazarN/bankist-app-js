@@ -40,36 +40,40 @@ let sorted = false;
   ["GBP", "Pound sterling"],
 ]); */
 
-const createUsernames = (accounts) => {
-  accounts.forEach((account) => {
+const createUsernames = accounts => {
+  accounts.forEach(account => {
     account.username = account.owner
       .toLowerCase()
       .split(' ')
-      .map((x) => x[0])
+      .map(x => x[0])
       .join('');
   });
+};
+
+const addZeroPadding = dateType => {
+  return `${dateType}`.padStart(2, 0);
 };
 
 /////////////////
 // Calculate here
 
-const calculateBalance = (account) => {
+const calculateBalance = account => {
   account.balance = account.movements.reduce((acc, mov) => acc + mov, 0);
   return account.balance;
 };
 
 const calculateSummaries = (movements, interestRate) => {
   const income = movements
-    .filter((mov) => mov > 0)
+    .filter(mov => mov > 0)
     .reduce((acc, mov) => acc + mov, 0);
 
   const outcome = movements
-    .filter((mov) => mov <= 0)
+    .filter(mov => mov <= 0)
     .reduce((acc, mov) => acc + mov, 0);
 
   const interest = movements
-    .filter((mov) => mov > 0)
-    .map((mov) => (mov * interestRate) / 100)
+    .filter(mov => mov > 0)
+    .map(mov => (mov * interestRate) / 100)
     .reduce((acc, int) => acc + int);
 
   return [income, outcome, interest];
@@ -78,21 +82,27 @@ const calculateSummaries = (movements, interestRate) => {
 ///////////////
 // Display here
 
-const displayMovements = (movements, sorted) => {
+const displayMovements = (acc, sorted) => {
   containerMovements.innerHTML = '';
 
   const movementsCopy = sorted
-    ? movements.slice().sort((x, y) => x - y)
-    : movements;
+    ? acc.movements.slice().sort((x, y) => x - y)
+    : acc.movements;
 
   movementsCopy.forEach((movement, i) => {
     const type = movement > 0 ? 'deposit' : 'withdrawal';
+
+    const movementDate = new Date(acc.movementsDates[i]);
+    const y = movementDate.getFullYear();
+    const m = addZeroPadding(movementDate.getMonth() + 1);
+    const d = addZeroPadding(movementDate.getDate());
 
     const html = `
       <div class="movements__row">
         <div class="movements__type movements__type--${type}">${
       i + 1
     } ${type}</div>
+        <div class="movements__date">${d}/${m}/${y}</div>
         <div class="movements__value">${movement}€</div>
       </div>`;
 
@@ -100,15 +110,15 @@ const displayMovements = (movements, sorted) => {
   });
 };
 
-const displayBalance = (balance) => (labelBalance.textContent = `${balance}€`);
+const displayBalance = balance => (labelBalance.textContent = `${balance}€`);
 
-const displaySummaries = (summaries) => {
+const displaySummaries = summaries => {
   labelSumIn.textContent = `${summaries[0]}€`;
   labelSumOut.textContent = `${Math.abs(summaries[1])}€`;
   labelSumInterest.textContent = `${summaries[2].toFixed(2)}€`;
 };
 
-const updateUI = (account) => {
+const updateUI = account => {
   const balance = calculateBalance(currentAccount);
   const summaries = calculateSummaries(
     currentAccount.movements,
@@ -116,7 +126,7 @@ const updateUI = (account) => {
   );
 
   // movements,
-  displayMovements(currentAccount.movements, false);
+  displayMovements(currentAccount, false);
 
   // balance,
   displayBalance(balance);
@@ -133,12 +143,12 @@ document.addEventListener('DOMContentLoaded', () => {
 // Event handlers
 
 // Logging in
-btnLogin.addEventListener('click', (e) => {
+btnLogin.addEventListener('click', e => {
   // prevent the submission
   e.preventDefault();
 
   currentAccount = accounts.find(
-    (account) => account.username === inputLoginUsername.value
+    account => account.username === inputLoginUsername.value
   );
 
   if (currentAccount?.pin === Number(inputLoginPin.value)) {
@@ -153,6 +163,16 @@ btnLogin.addEventListener('click', (e) => {
     labelWelcome.textContent = `Welcome back, ${
       currentAccount.owner.split(' ')[0]
     }`;
+
+    // Calculating printing the time that logged in
+    const now = new Date();
+    const yr = now.getFullYear();
+    const mt = `${addZeroPadding(now.getMonth() + 1)}`; // +1 for zero-based indexing of months
+    const dy = `${addZeroPadding(now.getDate())}`;
+    const hr = `${addZeroPadding(now.getHours())}`;
+    const mn = `${addZeroPadding(now.getMinutes())}`;
+    labelDate.textContent = `${dy}/${mt}/${yr} ${hr}:${mn}`;
+
     containerApp.style.opacity = 100;
 
     updateUI(currentAccount);
@@ -166,13 +186,13 @@ btnLogin.addEventListener('click', (e) => {
   inputLoginPin.blur(); // it removes the cursor blinking
 });
 
-btnTransfer.addEventListener('click', (e) => {
+btnTransfer.addEventListener('click', e => {
   e.preventDefault();
 
   const amount = Number(inputTransferAmount.value);
 
   const receviedAccount = accounts.find(
-    (account) => account.username === inputTransferTo.value
+    account => account.username === inputTransferTo.value
   );
 
   inputTransferAmount.value = inputTransferTo.value = '';
@@ -186,12 +206,14 @@ btnTransfer.addEventListener('click', (e) => {
   ) {
     currentAccount.movements.push(-amount);
     receviedAccount.movements.push(amount);
+    currentAccount.movementsDates.push(new Date().toISOString());
+    receviedAccount.movementsDates.push(new Date().toISOString());
 
     updateUI(currentAccount);
   }
 });
 
-btnClose.addEventListener('click', (e) => {
+btnClose.addEventListener('click', e => {
   e.preventDefault();
 
   if (
@@ -199,7 +221,7 @@ btnClose.addEventListener('click', (e) => {
     Number(inputClosePin.value) === currentAccount.pin
   ) {
     const index = accounts.findIndex(
-      (account) => account.username === currentAccount.username
+      account => account.username === currentAccount.username
     );
 
     console.log(index);
@@ -215,16 +237,14 @@ btnClose.addEventListener('click', (e) => {
   inputClosePin.blur();
 });
 
-btnLoan.addEventListener('click', (e) => {
+btnLoan.addEventListener('click', e => {
   e.preventDefault();
 
   const amount = Number(inputLoanAmount.value);
 
-  if (
-    amount > 0 &&
-    currentAccount.movements.some((mov) => mov > amount * 0.1)
-  ) {
+  if (amount > 0 && currentAccount.movements.some(mov => mov > amount * 0.1)) {
     currentAccount.movements.push(amount);
+    currentAccount.movementsDates.push(new Date().toISOString());
 
     updateUI(currentAccount);
   }
@@ -233,8 +253,8 @@ btnLoan.addEventListener('click', (e) => {
   inputLoanAmount.blur();
 });
 
-btnSort.addEventListener('click', (e) => {
+btnSort.addEventListener('click', e => {
   e.preventDefault();
-  displayMovements(currentAccount.movements, !sorted);
+  displayMovements(currentAccount, !sorted);
   sorted = !sorted;
 });
