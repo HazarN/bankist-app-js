@@ -52,6 +52,15 @@ const createUsernames = accounts => {
 
 // Date operations
 
+const dateOptions = {
+  minute: 'numeric',
+  hour: 'numeric',
+  day: 'numeric',
+  month: 'numeric',
+  year: 'numeric',
+  weekday: 'short',
+}; // For Intl localization API
+
 const addZeroPadding = dateType => {
   return `${dateType}`.padStart(2, 0);
 };
@@ -88,7 +97,7 @@ const calculateSummaries = (movements, interestRate) => {
 ///////////////
 // Display here
 
-const displayMovementDate = movementDate => {
+const displayMovementDate = (movementDate, locale) => {
   const y = movementDate.getFullYear();
   const m = addZeroPadding(movementDate.getMonth() + 1);
   const d = addZeroPadding(movementDate.getDate());
@@ -103,7 +112,7 @@ const displayMovementDate = movementDate => {
     case diff <= 7:
       return `${diff} Days Ago`;
     default:
-      return `${d}/${m}/${y}`;
+      return new Intl.DateTimeFormat(locale, dateOptions).format(movementDate);
   }
 };
 
@@ -188,12 +197,10 @@ btnLogin.addEventListener('click', e => {
 
     // Calculating printing the time that logged in
     const now = new Date();
-    const yr = now.getFullYear();
-    const mt = `${addZeroPadding(now.getMonth() + 1)}`; // +1 for zero-based indexing of months
-    const dy = `${addZeroPadding(now.getDate())}`;
-    const hr = `${addZeroPadding(now.getHours())}`;
-    const mn = `${addZeroPadding(now.getMinutes())}`;
-    labelDate.textContent = `${dy}/${mt}/${yr} ${hr}:${mn}`;
+    labelDate.textContent = Intl.DateTimeFormat(
+      currentAccount.locale,
+      dateOptions
+    ).format(now);
 
     containerApp.style.opacity = 100;
 

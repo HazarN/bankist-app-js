@@ -18,7 +18,7 @@ export const account1 = {
     '2020-08-01T10:51:36.790Z',
   ],
   currency: 'EUR',
-  locale: 'pt-PT', // de-DE
+  locale: 'tr-TR', // de-DE
 };
 
 export const account2 = {
@@ -58,7 +58,7 @@ export const account3 = {
     '2024-05-01T10:51:36.790Z',
   ],
   currency: 'EUR',
-  locale: 'pt-PT',
+  locale: 'en-GB',
 };
 
 export const account4 = {
