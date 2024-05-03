@@ -162,6 +162,12 @@ nav {
   background-image: linear-gradient(to top left, #e52a5a, #ff585f);
 }
 
+.movements__type--deposit,
+.movements__type--withdrawal {
+  width: 105px;
+  text-align: center; /* adjust this value as needed */
+}
+
 .movements__value {
   font-size: 1.7rem;
   margin-left: auto;
