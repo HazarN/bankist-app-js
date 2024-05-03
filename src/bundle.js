@@ -50,8 +50,14 @@ const createUsernames = accounts => {
   });
 };
 
+// Date operations
+
 const addZeroPadding = dateType => {
   return `${dateType}`.padStart(2, 0);
+};
+
+const daysPassed = (date1, date2) => {
+  return Math.round(Math.abs(date1 - date2) / (1000 * 60 * 60 * 24));
 };
 
 /////////////////
@@ -82,6 +88,25 @@ const calculateSummaries = (movements, interestRate) => {
 ///////////////
 // Display here
 
+const displayMovementDate = movementDate => {
+  const y = movementDate.getFullYear();
+  const m = addZeroPadding(movementDate.getMonth() + 1);
+  const d = addZeroPadding(movementDate.getDate());
+
+  const diff = daysPassed(new Date(), movementDate);
+
+  switch (true) {
+    case diff === 0:
+      return 'Today';
+    case diff === 1:
+      return 'Yesterday';
+    case diff <= 7:
+      return `${diff} Days Ago`;
+    default:
+      return `${d}/${m}/${y}`;
+  }
+};
+
 const displayMovements = (acc, sorted) => {
   containerMovements.innerHTML = '';
 
@@ -92,17 +117,14 @@ const displayMovements = (acc, sorted) => {
   movementsCopy.forEach((movement, i) => {
     const type = movement > 0 ? 'deposit' : 'withdrawal';
 
-    const movementDate = new Date(acc.movementsDates[i]);
-    const y = movementDate.getFullYear();
-    const m = addZeroPadding(movementDate.getMonth() + 1);
-    const d = addZeroPadding(movementDate.getDate());
+    const displayedDate = displayMovementDate(new Date(acc.movementsDates[i]));
 
     const html = `
       <div class="movements__row">
         <div class="movements__type movements__type--${type}">${
       i + 1
     } ${type}</div>
-        <div class="movements__date">${d}/${m}/${y}</div>
+        <div class="movements__date">${displayedDate}</div>
         <div class="movements__value">${movement}€</div>
       </div>`;
 
