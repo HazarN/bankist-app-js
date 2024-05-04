@@ -160,9 +160,23 @@ const displayBalance = balance =>
   ));
 
 const displaySummaries = summaries => {
-  labelSumIn.textContent = `${summaries[0]}€`;
-  labelSumOut.textContent = `${Math.abs(summaries[1])}€`;
-  labelSumInterest.textContent = `${summaries[2].toFixed(2)}€`;
+  const [inc, outc, int] = summaries;
+
+  labelSumIn.textContent = numberFormatting(
+    inc,
+    currentAccount.currency,
+    currentAccount.locale
+  );
+  labelSumOut.textContent = numberFormatting(
+    outc,
+    currentAccount.currency,
+    currentAccount.locale
+  );
+  labelSumInterest.textContent = numberFormatting(
+    int,
+    currentAccount.currency,
+    currentAccount.locale
+  );
 };
 
 const updateUI = account => {
