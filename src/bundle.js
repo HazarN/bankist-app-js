@@ -31,14 +31,8 @@ const inputClosePin = document.querySelector('.form__input--pin');
 
 const accounts = [account1, account2, account3, account4];
 
-let currentAccount;
+let currentAccount, timer;
 let sorted = false;
-
-/* const currencies = new Map([
-  ["USD", "United States dollar"],
-  ["EUR", "Euro"],
-  ["GBP", "Pound sterling"],
-]); */
 
 const createUsernames = accounts => {
   accounts.forEach(account => {
@@ -200,6 +194,27 @@ document.addEventListener('DOMContentLoaded', () => {
   createUsernames(accounts);
 });
 
+const startLogOutTimer = () => {
+  let counter = 120; // minutes
+
+  const tick = () => {
+    const mins = addZeroPadding(Math.trunc(counter / 60));
+    const secs = addZeroPadding(counter % 60);
+    labelTimer.textContent = `${mins}:${secs}`;
+
+    if (counter === 0) {
+      clearInterval(timer);
+      labelWelcome.textContent = 'Log in to get started';
+      containerApp.style.opacity = 0;
+    }
+
+    counter--;
+  };
+
+  tick(); // we need to call once, otherwise it stops when the timer is 1 (not 0)
+  return setInterval(tick, 1000);
+};
+
 /////////////////
 // Event handlers
 
@@ -234,6 +249,10 @@ btnLogin.addEventListener('click', e => {
 
     containerApp.style.opacity = 100;
 
+    // setting the timer
+    if (timer) clearInterval(timer);
+    timer = startLogOutTimer();
+
     updateUI(currentAccount);
   } else {
     console.log('USER NOT LOGGED IN');
@@ -254,9 +273,6 @@ btnTransfer.addEventListener('click', e => {
     account => account.username === inputTransferTo.value
   );
 
-  inputTransferAmount.value = inputTransferTo.value = '';
-  inputTransferAmount.blur();
-
   if (
     amount > 0 &&
     currentAccount.balance >= amount &&
@@ -268,8 +284,35 @@ btnTransfer.addEventListener('click', e => {
     currentAccount.movementsDates.push(new Date().toISOString());
     receviedAccount.movementsDates.push(new Date().toISOString());
 
+    clearInterval(timer);
+    timer = startLogOutTimer();
+
     updateUI(currentAccount);
   }
+
+  inputTransferAmount.value = inputTransferTo.value = '';
+  inputTransferAmount.blur();
+});
+
+btnLoan.addEventListener('click', e => {
+  e.preventDefault();
+
+  const amount = Number(inputLoanAmount.value);
+
+  if (amount > 0 && currentAccount.movements.some(mov => mov > amount * 0.1)) {
+    setTimeout(() => {
+      currentAccount.movements.push(amount);
+      currentAccount.movementsDates.push(new Date().toISOString());
+
+      clearInterval(timer);
+      timer = startLogOutTimer();
+
+      updateUI(currentAccount);
+    }, 2500);
+  }
+
+  inputLoanAmount.value = '';
+  inputLoanAmount.blur();
 });
 
 btnClose.addEventListener('click', e => {
@@ -294,22 +337,6 @@ btnClose.addEventListener('click', e => {
 
   inputCloseUsername.value = inputClosePin.value = '';
   inputClosePin.blur();
-});
-
-btnLoan.addEventListener('click', e => {
-  e.preventDefault();
-
-  const amount = Number(inputLoanAmount.value);
-
-  if (amount > 0 && currentAccount.movements.some(mov => mov > amount * 0.1)) {
-    currentAccount.movements.push(amount);
-    currentAccount.movementsDates.push(new Date().toISOString());
-
-    updateUI(currentAccount);
-  }
-
-  inputLoanAmount.value = '';
-  inputLoanAmount.blur();
 });
 
 btnSort.addEventListener('click', e => {
