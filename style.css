@@ -164,7 +164,7 @@ nav {
 
 .movements__type--deposit,
 .movements__type--withdrawal {
-  width: 105px;
+  width: 115px;
   text-align: center; /* adjust this value as needed */
 }
 

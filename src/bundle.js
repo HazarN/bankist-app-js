@@ -50,7 +50,7 @@ const createUsernames = accounts => {
   });
 };
 
-// Date operations
+// Date and Number Internationalization Operations
 
 const dateOptions = {
   minute: 'numeric',
@@ -60,6 +60,13 @@ const dateOptions = {
   year: 'numeric',
   weekday: 'short',
 }; // For Intl localization API
+
+const numberFormatting = (value, currency, locale) => {
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: currency,
+  }).format(value);
+};
 
 const addZeroPadding = dateType => {
   return `${dateType}`.padStart(2, 0);
@@ -134,14 +141,23 @@ const displayMovements = (acc, sorted) => {
       i + 1
     } ${type}</div>
         <div class="movements__date">${displayedDate}</div>
-        <div class="movements__value">${movement}€</div>
+        <div class="movements__value">${numberFormatting(
+          movement,
+          acc.currency,
+          acc.locale
+        )}</div>
       </div>`;
 
     containerMovements.insertAdjacentHTML('afterbegin', html);
   });
 };
 
-const displayBalance = balance => (labelBalance.textContent = `${balance}€`);
+const displayBalance = balance =>
+  (labelBalance.textContent = numberFormatting(
+    balance,
+    currentAccount.currency,
+    currentAccount.locale
+  ));
 
 const displaySummaries = summaries => {
   labelSumIn.textContent = `${summaries[0]}€`;

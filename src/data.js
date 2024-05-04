@@ -17,7 +17,7 @@ export const account1 = {
     '2020-07-28T23:36:17.929Z',
     '2020-08-01T10:51:36.790Z',
   ],
-  currency: 'EUR',
+  currency: 'TRY',
   locale: 'tr-TR', // de-DE
 };
 
